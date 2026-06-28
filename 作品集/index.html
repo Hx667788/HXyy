@@ -1,0 +1,613 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>个人设计作品集</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: "Microsoft Yahei", sans-serif; }
+        body { background-color: #f5f7fa; color: #333; }
+        /* 导航栏 */
+        header { background: #192a56; color: #fff; padding: 1rem 5%; position: sticky; top: 0; z-index: 99; }
+        .nav-box { max-width: 1400px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; }
+        .logo { font-size: 24px; font-weight: bold; }
+        nav ul { display: flex; gap: 20px; list-style: none; flex-wrap: wrap; }
+        nav a { color: #fff; text-decoration: none; font-size: 15px; padding: 8px 12px; border-radius: 4px; transition: 0.3s; }
+        nav a:hover, nav a.active { background: #273c75; }
+        /* 头部横幅 */
+        .banner { height: 300px; background: linear-gradient(135deg, #192a56, #487eb0); display: flex; flex-direction: column; justify-content: center; align-items: center; color: #fff; }
+        .banner h1 { font-size: 42px; margin-bottom: 15px; }
+        .banner p { font-size: 18px; opacity: 0.9; }
+        /* 容器通用 */
+        .container { max-width: 1400px; margin: 50px auto; padding: 0 5%; }
+        .title { text-align: center; font-size: 30px; margin-bottom: 40px; color: #192a56; position: relative; }
+        .title::after { content: ""; width: 80px; height: 3px; background: #192a56; position: absolute; left: 50%; transform: translateX(-50%); bottom: -10px; }
+        /* 分类卡片布局 */
+        .cate-wrap { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 30px; margin-bottom: 60px; }
+        .cate-card { background: #fff; border-radius: 10px; overflow: hidden; box-shadow: 0 3px 15px rgba(0,0,0,0.08); transition: 0.3s; }
+        .cate-card:hover { transform: translateY(-8px); box-shadow: 0 8px 25px rgba(0,0,0,0.12); }
+        .card-img { height: 200px; background: #dcdfe6; display: flex; align-items: center; justify-content: center; font-size: 60px; color: #192a56; }
+        .card-text { padding: 20px; }
+        .card-text h3 { font-size: 20px; margin-bottom: 10px; color: #192a56; }
+        .card-text p { color: #666; line-height: 1.6; margin-bottom: 15px; }
+        .card-btn { display: inline-block; padding: 9px 20px; background: #192a56; color: #fff; text-decoration: none; border-radius: 4px; font-size: 14px; }
+        /* 作品展示区域 */
+        .work-section { display: none; margin: 40px 0; }
+        .work-section.active { display: block; }
+        .work-grid { display: flex; gap: 20px; overflow-x: auto; padding-bottom: 12px; -webkit-overflow-scrolling: touch; scroll-snap-type: x mandatory; }
+        .work-grid::-webkit-scrollbar { height: 6px; }
+        .work-grid::-webkit-scrollbar-track { background: #e8edf5; border-radius: 3px; }
+        .work-grid::-webkit-scrollbar-thumb { background: #c8d6e5; border-radius: 3px; }
+        .work-item { flex: 0 0 260px; background: #fff; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 10px rgba(0,0,0,0.06); transition: 0.3s; cursor: pointer; scroll-snap-align: start; }
+        .work-item:hover { transform: translateY(-5px); box-shadow: 0 8px 25px rgba(0,0,0,0.13); }
+        .work-item .img-wrap { width: 100%; height: 200px; overflow: hidden; background: #e8edf5; display: flex; align-items: center; justify-content: center; }
+        .work-item .img-wrap img { width: 100%; height: 100%; object-fit: contain; display: block; transition: 0.4s; }
+        .work-item:hover .img-wrap img { transform: scale(1.05); }
+        .work-item .img-wrap video { width: 100%; height: 100%; object-fit: cover; }
+        .work-item .img-wrap .video-icon { position: absolute; font-size: 50px; color: rgba(255,255,255,0.85); pointer-events: none; }
+        .work-item .item-label { padding: 10px 14px; font-size: 13px; color: #333; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        /* 海报区：略宽以展示竖版海报 */
+        #posterGrid .work-item { flex: 0 0 280px; }
+        /* 代码项目卡片 */
+        .code-project { flex: 0 0 240px; background: #fff; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 10px rgba(0,0,0,0.06); transition: 0.3s; text-decoration: none; color: inherit; display: block; cursor: pointer; scroll-snap-align: start; }
+        .code-project:hover { transform: translateY(-5px); box-shadow: 0 8px 25px rgba(0,0,0,0.13); }
+        .code-project .img-wrap { width: 100%; height: 180px; overflow: hidden; background: linear-gradient(135deg, #192a56, #487eb0); display: flex; align-items: center; justify-content: center; position: relative; }
+        .code-project .img-wrap img { width: 100%; height: 100%; object-fit: cover; transition: 0.4s; }
+        .code-project:hover .img-wrap img { transform: scale(1.05); }
+        .code-project .img-wrap .code-icon { font-size: 60px; color: rgba(255,255,255,0.75); }
+        .code-project .code-info { padding: 14px; }
+        .code-project .code-info h4 { font-size: 15px; color: #192a56; margin-bottom: 4px; }
+        .code-project .code-info span { font-size: 12px; color: #999; }
+        /* 模态框 */
+        .modal { display: none; position: fixed; z-index: 999; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.92); align-items: center; justify-content: center; flex-direction: column; }
+        .modal.show { display: flex; }
+        .modal img, .modal video { max-width: 90%; max-height: 82vh; border-radius: 6px; box-shadow: 0 10px 40px rgba(0,0,0,0.5); }
+        .modal video { outline: none; }
+        .modal .close-btn { position: absolute; top: 20px; right: 35px; font-size: 42px; color: #fff; cursor: pointer; transition: 0.2s; z-index: 2; line-height: 1; }
+        .modal .close-btn:hover { color: #e74c3c; }
+        .modal .modal-caption { color: #bbb; margin-top: 14px; font-size: 14px; }
+        /* 个人简历 */
+        .resume-wrap { display: grid; grid-template-columns: 300px 1fr; gap: 30px; align-items: stretch; }
+        .resume-sidebar { background: #fff; border-radius: 10px; padding: 30px; box-shadow: 0 2px 10px rgba(0,0,0,0.06); text-align: center; display: flex; flex-direction: column; }
+        .resume-avatar { width: 120px; height: 120px; border-radius: 50%; background: linear-gradient(135deg, #192a56, #487eb0); margin: 0 auto 20px; display: flex; align-items: center; justify-content: center; font-size: 48px; color: #fff; overflow: hidden; }
+        .resume-avatar img { width: 100%; height: 100%; object-fit: cover; }
+        .resume-sidebar h3 { color: #192a56; margin-bottom: 5px; font-size: 22px; }
+        .resume-subtitle { color: #888; font-size: 14px; margin-bottom: 20px; }
+        .resume-info { text-align: left; margin-top: 20px; }
+        .info-row { display: flex; align-items: center; gap: 10px; padding: 8px 0; font-size: 14px; color: #555; border-bottom: 1px solid #f0f0f0; }
+        .info-icon { font-size: 16px; width: 24px; text-align: center; flex-shrink: 0; }
+        .resume-skills { margin-top: 25px; text-align: left; }
+        .resume-skills h4 { font-size: 16px; color: #192a56; margin-bottom: 12px; }
+        .skill-item { margin-bottom: 10px; }
+        .skill-name { font-size: 13px; color: #555; margin-bottom: 4px; }
+        .skill-bar { height: 6px; background: #e8edf5; border-radius: 3px; overflow: hidden; }
+        .skill-bar .fill { height: 100%; background: linear-gradient(90deg, #192a56, #487eb0); border-radius: 3px; transition: width 1s ease; }
+        .resume-main { display: flex; flex-direction: column; gap: 25px; }
+        .resume-block { background: #fff; border-radius: 10px; padding: 25px; box-shadow: 0 2px 10px rgba(0,0,0,0.06); }
+        .resume-block h3 { color: #192a56; font-size: 18px; margin-bottom: 15px; padding-bottom: 10px; border-bottom: 2px solid #487eb0; display: flex; align-items: center; gap: 8px; }
+        .timeline-item { position: relative; padding-left: 20px; margin-bottom: 18px; border-left: 2px solid #c8d6e5; }
+        .timeline-item:last-child { margin-bottom: 0; }
+        .timeline-item::before { content: ""; position: absolute; left: -6px; top: 4px; width: 10px; height: 10px; border-radius: 50%; background: #487eb0; }
+        .time-label { font-size: 13px; color: #888; margin-bottom: 4px; }
+        .timeline-item h4 { font-size: 15px; color: #333; margin-bottom: 4px; }
+        .timeline-item p { font-size: 13px; color: #666; line-height: 1.6; }
+        /* 页脚 */
+        footer { background: #192a56; color: #fff; text-align: center; padding: 30px 0; margin-top: 80px; }
+        /* 响应式适配手机 */
+        @media (max-width:768px) {
+            .nav-box { flex-direction: column; gap: 15px; }
+            nav ul { justify-content: center; }
+            .banner { height: 220px; }
+            .banner h1 { font-size: 28px; }
+            .work-grid { gap: 12px; }
+            .work-item { flex: 0 0 180px; }
+            .work-item .img-wrap { height: 140px; }
+            .code-project { flex: 0 0 180px; }
+            .code-project .img-wrap { height: 130px; }
+            #posterGrid .work-item { flex: 0 0 200px; }
+            .modal .close-btn { top: 12px; right: 18px; font-size: 32px; }
+            .resume-wrap { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <!-- 导航栏 -->
+    <header>
+        <div class="nav-box">
+            <div class="logo">个人作品集</div>
+            <nav>
+                <ul>
+                    <li><a href="#" class="active" onclick="showAll()">首页</a></li>
+                    <li><a href="#resume" onclick="switchTab('resume')">个人简历</a></li>
+                    <li><a href="#code" onclick="switchTab('code')">网页代码</a></li>
+                    <li><a href="#vector" onclick="switchTab('vector')">矢量图绘制</a></li>
+                    <li><a href="#poster" onclick="switchTab('poster')">海报设计</a></li>
+                    <li><a href="#ui" onclick="switchTab('ui')">UI网页设计</a></li>
+                    <li><a href="#cert" onclick="switchTab('cert')">奖状证书</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <!-- 顶部横幅 -->
+    <section class="banner">
+        <h1>原创设计作品集</h1>
+        <p>个人简历 | 网页开发 | 矢量插画 | 海报 | UI界面 | 荣誉证书</p>
+    </section>
+
+    <div class="container">
+        <h2 class="title">作品分类</h2>
+        <!-- 六大分类卡片 -->
+        <div class="cate-wrap">
+            <!-- 0.个人简历 -->
+            <div class="cate-card">
+                <div class="card-img">&#128100;</div>
+                <div class="card-text">
+                    <h3>个人简历</h3>
+                    <p>基本信息、教育背景、专业技能、项目经历，全面展示个人能力与发展历程</p>
+                    <a href="#resume" class="card-btn" onclick="switchTab('resume')">查看简历</a>
+                </div>
+            </div>
+            <!-- 1.网页代码 -->
+            <div class="cate-card">
+                <div class="card-img">💻</div>
+                <div class="card-text">
+                    <h3>网页代码</h3>
+                    <p>HTML/CSS/JS静态网页、前端页面、官网、管理系统、移动端适配页面源码展示</p>
+                    <a href="#code" class="card-btn" onclick="switchTab('code')">查看作品</a>
+                </div>
+            </div>
+            <!-- 2.矢量图绘制 -->
+            <div class="cate-card">
+                <div class="card-img">✏️</div>
+                <div class="card-text">
+                    <h3>矢量图绘制</h3>
+                    <p>AI矢量插画、图标设计、扁平化图形、LOGO、可无限放大的矢量原创图形作品</p>
+                    <a href="#vector" class="card-btn" onclick="switchTab('vector')">查看作品</a>
+                </div>
+            </div>
+            <!--3.海报设计-->
+            <div class="cate-card">
+                <div class="card-img">🖼️</div>
+                <div class="card-text">
+                    <h3>海报设计</h3>
+                    <p>活动海报、宣传海报、电商海报、节日海报、版式创意视觉海报作品集</p>
+                    <a href="#poster" class="card-btn" onclick="switchTab('poster')">查看作品</a>
+                </div>
+            </div>
+            <!--4.UI网页设计-->
+            <div class="cate-card">
+                <div class="card-img">📱</div>
+                <div class="card-text">
+                    <h3>UI网页设计</h3>
+                    <p>APP界面、后台管理UI、小程序页面、网页视觉界面、交互原型设计</p>
+                    <a href="#ui" class="card-btn" onclick="switchTab('ui')">查看作品</a>
+                </div>
+            </div>
+            <!--5.奖状证书-->
+            <div class="cate-card">
+                <div class="card-img">🏅</div>
+                <div class="card-text">
+                    <h3>奖状证书</h3>
+                    <p>各类获奖奖状、技能证书、荣誉证书、资格证书、比赛获奖证明存档展示</p>
+                    <a href="#cert" class="card-btn" onclick="switchTab('cert')">查看证书</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- ========= 0. 个人简历 ========= -->
+        <section id="resume" class="work-section">
+            <h2 class="title">个人简历</h2>
+            <div class="resume-wrap">
+                <div class="resume-sidebar">
+                    <div class="resume-avatar"><img src="证件照.jpg" alt="证件照"></div>
+                    <h3>洪僖</h3>
+                    <p class="resume-subtitle">网页设计师</p>
+                    <a href="洪僖简历设计版本(2).pdf" target="_blank" style="display:inline-block;padding:8px 20px;background:#192a56;color:#fff;text-decoration:none;border-radius:6px;font-size:13px;margin-bottom:16px;">&#128196; 下载PDF简历</a>
+                    <div style="text-align:left;margin-bottom:14px;">
+                        <h4 style="font-size:16px;color:#192a56;margin-bottom:10px;">&#127891; 教育背景</h4>
+                        <div style="font-size:14px;color:#555;line-height:1.7;">
+                            <div style="margin-bottom:4px;"><strong>2025 - 2027</strong></div>
+                            <div>广州东华职业技术学院</div>
+                            <div style="color:#888;font-size:13px;">计算机应用专业 · 大专</div>
+                        </div>
+                    </div>
+                    <div class="resume-info">
+                        <div class="info-row"><span class="info-icon">&#128205;</span>意向城市：广州 / 珠海 / 中山</div>
+                        <div class="info-row"><span class="info-icon">&#128241;</span>19865320980</div>
+                        <div class="info-row"><span class="info-icon">&#128172;</span>微信：Hx99887700</div>
+                        <div class="info-row"><span class="info-icon">&#9993;</span>2537480415@qq.com</div>
+                        <div class="info-row"><span class="info-icon">&#127874;</span>19岁 · 汉族 · 群众</div>
+                        <div class="info-row"><span class="info-icon">&#127968;</span>籍贯：潮阳</div>
+                    </div>
+                    <div class="resume-skills">
+                        <h4>专业技能</h4>
+                        <div class="skill-item">
+                            <div class="skill-name">Photoshop</div>
+                            <div class="skill-bar"><div class="fill" style="width:90%"></div></div>
+                        </div>
+                        <div class="skill-item">
+                            <div class="skill-name">Illustrator</div>
+                            <div class="skill-bar"><div class="fill" style="width:85%"></div></div>
+                        </div>
+                        <div class="skill-item">
+                            <div class="skill-name">Web前端开发</div>
+                            <div class="skill-bar"><div class="fill" style="width:82%"></div></div>
+                        </div>
+                        <div class="skill-item">
+                            <div class="skill-name">Vue前端开发</div>
+                            <div class="skill-bar"><div class="fill" style="width:70%"></div></div>
+                        </div>
+                        <div class="skill-item">
+                            <div class="skill-name">微信小程序</div>
+                            <div class="skill-bar"><div class="fill" style="width:65%"></div></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="resume-main">
+                    <div class="resume-block">
+                        <h3>&#127891; 校园经历</h3>
+                        <div class="timeline-item">
+                            <div class="time-label">社联秘书部</div>
+                            <h4>秘书干事 → 秘书部部长</h4>
+                            <p>配合干部工作、参与会议并做好记录，锻炼信息提炼总结能力；担任部长后协调校内各类社团活动、独立策划活动并上台演讲，具备组织协调与沟通策划能力。</p>
+                        </div>
+                        <div class="timeline-item">
+                            <div class="time-label">设计赛事</div>
+                            <h4>省级海报设计赛事</h4>
+                            <p>高中、大学多次参加省级海报设计赛事，可独立完成整套设计作品，熟练使用PPT展示、讲解作品设计思路，拥有审美能力与内容表达能力。</p>
+                        </div>
+                        <div class="timeline-item">
+                            <div class="time-label">思创社</div>
+                            <h4>社团活动组织</h4>
+                            <p>大学加入思创社，参与各类社团活动，协助校园宣讲会筹备、内容核对与现场统筹工作，培养团队意识与责任感。</p>
+                        </div>
+                    </div>
+                    <div class="resume-block">
+                        <h3>&#128188; 社会实践</h3>
+                        <div class="timeline-item">
+                            <div class="time-label">2024.12 — 2025.2</div>
+                            <h4>中山 · 田园超市</h4>
+                            <p>负责收银对账、商品理货陈列、库存盘点管理；培养细节把控力与责任心，做设计时注重像素对齐、写代码时细心排查语法错误。</p>
+                        </div>
+                        <div class="timeline-item">
+                            <div class="time-label">2025.7 — 2026.2</div>
+                            <h4>珠海 · 谜盒子实景娱乐</h4>
+                            <p>收银对账、引导顾客游玩、讲解游戏剧情、处理客户投诉；耐心对接各类客户，高峰期身兼多岗，锻炼团队协作、客户沟通表达能力。</p>
+                        </div>
+                    </div>
+                    <div class="resume-block">
+                        <h3>&#127942; 荣誉奖项</h3>
+                        <div class="timeline-item">
+                            <div class="time-label">2022</div>
+                            <h4>珠海理工职业技术学院 书法一等奖</h4>
+                        </div>
+                        <div class="timeline-item">
+                            <div class="time-label">2023</div>
+                            <h4>广东省职业院校海报设计一等奖</h4>
+                        </div>
+                        <div class="timeline-item">
+                            <div class="time-label">2023</div>
+                            <h4>珠海理工职业技术学院"优秀干部"荣誉称号</h4>
+                        </div>
+                        <div class="timeline-item">
+                            <div class="time-label">2024</div>
+                            <h4>广东省教育双融双创艺术类珠海市二等奖</h4>
+                        </div>
+                        <div class="timeline-item">
+                            <div class="time-label">2026</div>
+                            <h4>广州东华职业技术学院周边大赛优秀奖</h4>
+                        </div>
+                    </div>
+                    <div class="resume-block">
+                        <h3>&#128075; 自我评价</h3>
+                        <p style="color:#555;line-height:1.8;font-size:14px;margin-bottom:8px;"><strong>视频剪辑能力：</strong>运营营销号独立剪辑短视频，自主筛选素材、把控视频节奏、输出成片，可根据需求切换剪辑风格，拥有基础视频叙事能力。</p>
+                        <p style="color:#555;line-height:1.8;font-size:14px;margin-bottom:8px;"><strong>策划执行能力：</strong>独立统筹多人团建活动，从方案撰写、物资采购到现场落地全程跟进，协调多方需求保障活动顺利开展。</p>
+                        <p style="color:#555;line-height:1.8;font-size:14px;"><strong>用户洞察与创意能力：</strong>擅长观察用户需求、结合创意输出落地设计方案；赛事作品中擅长文案搭配视觉设计，提升作品整体表现力。</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ========= 1. 网页代码作品 ========= -->
+        <section id="code" class="work-section">
+            <h2 class="title">网页代码作品</h2>
+            <div class="work-grid">
+                <a class="code-project" href="网页代码-html、vue/星遇.html" target="_blank">
+                    <div class="img-wrap">
+                        <span class="code-icon">&#128187;</span>
+                    </div>
+                    <div class="code-info">
+                        <h4>星遇 — 品牌展示页面</h4>
+                        <span>HTML / CSS 独立页面</span>
+                    </div>
+                </a>
+                <a class="code-project" href="网页代码-html、vue/儿童广告/04.html" target="_blank">
+                    <div class="img-wrap">
+                        <img src="网页代码-html、vue/儿童广告/images/img1.jpg" alt="儿童广告" loading="lazy">
+                    </div>
+                    <div class="code-info">
+                        <h4>儿童广告 — 活动推广页</h4>
+                        <span>HTML静态页面展示</span>
+                    </div>
+                </a>
+                <a class="code-project" href="网页代码-html、vue/时尚广告/正常.html" target="_blank">
+                    <div class="img-wrap">
+                        <img src="网页代码-html、vue/时尚广告/images/banner.jpg" alt="时尚广告" loading="lazy">
+                    </div>
+                    <div class="code-info">
+                        <h4>时尚广告 — 电商专题页</h4>
+                        <span>HTML / CSS 前端页面</span>
+                    </div>
+                </a>
+                <a class="code-project" href="网页代码-html、vue/英语培训/学好英语.html" target="_blank">
+                    <div class="img-wrap">
+                        <img src="网页代码-html、vue/英语培训/images/01.jpg" alt="英语培训" loading="lazy">
+                    </div>
+                    <div class="code-info">
+                        <h4>英语培训 — 教育机构页</h4>
+                        <span>HTML / CSS / JS 交互页面</span>
+                    </div>
+                </a>
+                <a class="code-project" href="网页代码-html、vue/社团登录系统/index.html" target="_blank">
+                    <div class="img-wrap">
+                        <img src="网页代码-html、vue/社团登录系统/img/1.png" alt="社团登录系统" loading="lazy">
+                    </div>
+                    <div class="code-info">
+                        <h4>社团登录系统</h4>
+                        <span>登录 / 注册交互系统</span>
+                    </div>
+                </a>
+            </div>
+        </section>
+
+        <!-- ========= 2. 矢量图绘制作品 ========= -->
+        <section id="vector" class="work-section">
+            <h2 class="title">矢量图绘制作品</h2>
+            <div class="work-grid">
+                <div class="work-item" onclick="openModal('矢量图绘制-ai/2.5D瀑布.jpg', '2.5D瀑布')">
+                    <div class="img-wrap"><img src="矢量图绘制-ai/2.5D瀑布.jpg" alt="2.5D瀑布" loading="lazy"></div>
+                    <div class="item-label">2.5D瀑布</div>
+                </div>
+                <div class="work-item" onclick="openModal('矢量图绘制-ai/东华周边水杯.png', '东华周边水杯')">
+                    <div class="img-wrap"><img src="矢量图绘制-ai/东华周边水杯.png" alt="东华周边水杯" loading="lazy"></div>
+                    <div class="item-label">东华周边水杯</div>
+                </div>
+                <div class="work-item" onclick="openModal('矢量图绘制-ai/天猫.png', '天猫')">
+                    <div class="img-wrap"><img src="矢量图绘制-ai/天猫.png" alt="天猫" loading="lazy"></div>
+                    <div class="item-label">天猫</div>
+                </div>
+                <div class="work-item" onclick="openModal('矢量图绘制-ai/玻璃窗.png', '玻璃窗')">
+                    <div class="img-wrap"><img src="矢量图绘制-ai/玻璃窗.png" alt="玻璃窗" loading="lazy"></div>
+                    <div class="item-label">玻璃窗</div>
+                </div>
+                <div class="work-item" onclick="openModal('矢量图绘制-ai/直播间优惠券.png', '直播间优惠券')">
+                    <div class="img-wrap"><img src="矢量图绘制-ai/直播间优惠券.png" alt="直播间优惠券" loading="lazy"></div>
+                    <div class="item-label">直播间优惠券</div>
+                </div>
+                <div class="work-item" onclick="openModal('矢量图绘制-ai/精灵宝可梦.png', '精灵宝可梦')">
+                    <div class="img-wrap"><img src="矢量图绘制-ai/精灵宝可梦.png" alt="精灵宝可梦" loading="lazy"></div>
+                    <div class="item-label">精灵宝可梦</div>
+                </div>
+                <div class="work-item" onclick="openModal('矢量图绘制-ai/鹅鸭杀.png', '鹅鸭杀')">
+                    <div class="img-wrap"><img src="矢量图绘制-ai/鹅鸭杀.png" alt="鹅鸭杀" loading="lazy"></div>
+                    <div class="item-label">鹅鸭杀</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ========= 3. 海报设计作品 ========= -->
+        <section id="poster" class="work-section">
+            <h2 class="title">海报设计作品</h2>
+            <div class="work-grid" id="posterGrid">
+                <div class="work-item" onclick="openModal('海报设计-ps/2025一直在努力爱自己.png','2025一直在努力爱自己')">
+                    <div class="img-wrap"><img src="海报设计-ps/2025一直在努力爱自己.png" alt="2025一直在努力爱自己" loading="lazy"></div>
+                    <div class="item-label">2025一直在努力爱自己</div>
+                </div>
+                <div class="work-item" onclick="openModal('海报设计-ps/3.国庆海报.png','国庆海报')">
+                    <div class="img-wrap"><img src="海报设计-ps/3.国庆海报.png" alt="国庆海报" loading="lazy"></div>
+                    <div class="item-label">国庆海报</div>
+                </div>
+                <div class="work-item" onclick="openModal('海报设计-ps/4.保护海洋.png','保护海洋')">
+                    <div class="img-wrap"><img src="海报设计-ps/4.保护海洋.png" alt="保护海洋" loading="lazy"></div>
+                    <div class="item-label">保护海洋</div>
+                </div>
+                <div class="work-item" onclick="openModal('海报设计-ps/关爱野生动物海报.png','关爱野生动物海报')">
+                    <div class="img-wrap"><img src="海报设计-ps/关爱野生动物海报.png" alt="关爱野生动物海报" loading="lazy"></div>
+                    <div class="item-label">关爱野生动物海报</div>
+                </div>
+                <div class="work-item" onclick="openModal('海报设计-ps/远离毒品.png','远离毒品')">
+                    <div class="img-wrap"><img src="海报设计-ps/远离毒品.png" alt="远离毒品" loading="lazy"></div>
+                    <div class="item-label">远离毒品</div>
+                </div>
+                <div class="work-item" onclick="openVideoModal('海报设计-ps/苍蓝名片.mp4','苍蓝名片')">
+                    <div class="img-wrap" style="position:relative; background:#1a1a2e;">
+                        <video src="海报设计-ps/苍蓝名片.mp4" muted preload="metadata" style="width:100%;height:100%;object-fit:cover;pointer-events:none;"></video>
+                        <span style="position:absolute;font-size:40px;color:rgba(255,255,255,0.8);pointer-events:none;">▶</span>
+                    </div>
+                    <div class="item-label">苍蓝名片（视频）</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ========= 4. UI网页设计作品 ========= -->
+        <section id="ui" class="work-section">
+            <h2 class="title">UI网页设计作品</h2>
+            <div class="work-grid">
+                <div class="work-item" onclick="openModal('UI网页-figma/APP界面练习.png', 'APP界面练习')">
+                    <div class="img-wrap"><img src="UI网页-figma/APP界面练习.png" alt="APP界面练习" loading="lazy"></div>
+                    <div class="item-label">APP界面练习</div>
+                </div>
+                <div class="work-item" onclick="openModal('UI网页-figma/App设计练习.png', 'App设计练习')">
+                    <div class="img-wrap"><img src="UI网页-figma/App设计练习.png" alt="App设计练习" loading="lazy"></div>
+                    <div class="item-label">App设计练习</div>
+                </div>
+                <div class="work-item" onclick="openModal('UI网页-figma/响应式练习.png', '响应式练习')">
+                    <div class="img-wrap"><img src="UI网页-figma/响应式练习.png" alt="响应式练习" loading="lazy"></div>
+                    <div class="item-label">响应式练习</div>
+                </div>
+                <div class="work-item" onclick="openModal('UI网页-figma/移动端练习.png', '移动端练习')">
+                    <div class="img-wrap"><img src="UI网页-figma/移动端练习.png" alt="移动端练习" loading="lazy"></div>
+                    <div class="item-label">移动端练习</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ========= 5. 奖状证书 ========= -->
+        <section id="cert" class="work-section">
+            <h2 class="title">奖状证书存档</h2>
+            <div class="work-grid">
+                <div class="work-item" onclick="openModal('证书奖状/2023年\u201c拒毒禁毒\u201d一等獎.jpg', '2023年拒毒禁毒一等奖')">
+                    <div class="img-wrap"><img src="证书奖状/2023年&#x201C;拒毒禁毒&#x201D;一等獎.jpg" alt="拒毒禁毒一等奖" loading="lazy"></div>
+                    <div class="item-label">2023年"拒毒禁毒"一等奖</div>
+                </div>
+                <div class="work-item" onclick="openModal('证书奖状/2023年主题绘画展览三等奖.jpg', '2023年主题绘画展览三等奖')">
+                    <div class="img-wrap"><img src="证书奖状/2023年主题绘画展览三等奖.jpg" alt="主题绘画展览三等奖" loading="lazy"></div>
+                    <div class="item-label">2023年主题绘画展览三等奖</div>
+                </div>
+                <div class="work-item" onclick="openModal('证书奖状/珠海市理工职业技术学院毕业证书.jpg', '毕业证书')">
+                    <div class="img-wrap"><img src="证书奖状/珠海市理工职业技术学院毕业证书.jpg" alt="毕业证书" loading="lazy"></div>
+                    <div class="item-label">珠海市理工职业技术学院毕业证书</div>
+                </div>
+                <div class="work-item" onclick="openModal('证书奖状/计算机一级证书.jpg', '计算机一级证书')">
+                    <div class="img-wrap"><img src="证书奖状/计算机一级证书.jpg" alt="计算机一级证书" loading="lazy"></div>
+                    <div class="item-label">计算机一级证书</div>
+                </div>
+                <div class="work-item" onclick="openModal('证书奖状/计算机维修证四级.jpg', '计算机维修证四级')">
+                    <div class="img-wrap"><img src="证书奖状/计算机维修证四级.jpg" alt="计算机维修证四级" loading="lazy"></div>
+                    <div class="item-label">计算机维修证四级</div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- 模态框：图片/视频预览 -->
+    <div id="imageModal" class="modal" onclick="closeModal()">
+        <span class="close-btn" onclick="closeModal()">&times;</span>
+        <div id="modalContent"></div>
+        <div class="modal-caption" id="modalCaption"></div>
+    </div>
+
+    <!-- 页脚 -->
+    <footer>
+        <p>© 2026 个人设计作品集 版权所有</p>
+    </footer>
+
+    <script>
+        // 切换分类展示
+        function switchTab(id) {
+            document.querySelectorAll('.work-section').forEach(function(item) {
+                item.classList.remove('active');
+            });
+            document.getElementById(id).classList.add('active');
+            document.getElementById(id).scrollIntoView({ behavior: 'smooth' });
+            // 更新导航高亮
+            document.querySelectorAll('nav a').forEach(function(a) { a.classList.remove('active'); });
+            var link = document.querySelector('nav a[href="#' + id + '"]');
+            if (link) link.classList.add('active');
+        }
+
+        // 返回首页
+        function showAll() {
+            document.querySelectorAll('.work-section').forEach(function(item) {
+                item.classList.remove('active');
+            });
+            document.querySelectorAll('nav a').forEach(function(a) { a.classList.remove('active'); });
+            document.querySelector('nav a[href="#"]').classList.add('active');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // 打开图片模态框
+        function openModal(src, caption) {
+            var modal = document.getElementById('imageModal');
+            var content = document.getElementById('modalContent');
+            var cap = document.getElementById('modalCaption');
+            content.innerHTML = '<img src="' + src + '" alt="' + caption + '">';
+            cap.textContent = caption || '';
+            modal.classList.add('show');
+            document.body.style.overflow = 'hidden';
+        }
+
+        // 打开视频模态框
+        function openVideoModal(src, caption) {
+            var modal = document.getElementById('imageModal');
+            var content = document.getElementById('modalContent');
+            var cap = document.getElementById('modalCaption');
+            content.innerHTML = '<video src="' + src + '" controls autoplay style="max-width:90%; max-height:82vh; border-radius:6px;"></video>';
+            cap.textContent = caption || '';
+            modal.classList.add('show');
+            document.body.style.overflow = 'hidden';
+        }
+
+        // 关闭模态框
+        function closeModal() {
+            var modal = document.getElementById('imageModal');
+            modal.classList.remove('show');
+            document.body.style.overflow = '';
+            // 停止视频播放
+            var video = document.querySelector('#modalContent video');
+            if (video) { video.pause(); video.currentTime = 0; }
+            document.getElementById('modalContent').innerHTML = '';
+        }
+
+        // ESC 关闭
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') closeModal();
+        });
+
+        // ===== 统一每个分类中图片的高度 =====
+        function equalizeHeights() {
+            document.querySelectorAll('.work-grid').forEach(function(grid) {
+                // 排除网页代码区
+                if (grid.closest('#code')) return;
+                var wraps = grid.querySelectorAll('.img-wrap');
+                if (wraps.length === 0) return;
+                // 先重置为 auto，让图片按自然比例显示
+                wraps.forEach(function(w) { w.style.height = 'auto'; });
+                // 找到最高的那个
+                var maxH = 0;
+                wraps.forEach(function(w) {
+                    var h = w.getBoundingClientRect().height;
+                    if (h > maxH) maxH = h;
+                });
+                // 全部统一成最高
+                wraps.forEach(function(w) { w.style.height = maxH + 'px'; });
+            });
+        }
+        window.addEventListener('load', function() {
+            setTimeout(equalizeHeights, 300);
+        });
+        window.addEventListener('resize', function() {
+            setTimeout(equalizeHeights, 200);
+        });
+
+        // ===== 海报行自动循环滚动 =====
+        var posterScrollTimer = null;
+        function posterAutoScroll() {
+            var grid = document.getElementById('posterGrid');
+            if (!grid) return;
+            var items = grid.querySelectorAll('.work-item');
+            if (items.length === 0) return;
+            var current = 0;
+            function scrollNext() {
+                current = (current + 1) % items.length;
+                grid.scrollTo({ left: items[current].offsetLeft, behavior: 'smooth' });
+            }
+            clearInterval(posterScrollTimer);
+            posterScrollTimer = setInterval(scrollNext, 3000);
+            grid.addEventListener('mouseenter', function() { clearInterval(posterScrollTimer); });
+            grid.addEventListener('mouseleave', function() { posterScrollTimer = setInterval(scrollNext, 3000); });
+            // 触摸时暂停
+            grid.addEventListener('touchstart', function() { clearInterval(posterScrollTimer); });
+            grid.addEventListener('touchend', function() { posterScrollTimer = setInterval(scrollNext, 3000); });
+        }
+        // 切换到海报时启动自动滚动 + 统一高度
+        var _origSwitchTab2 = switchTab;
+        switchTab = function(id) {
+            _origSwitchTab2(id);
+            setTimeout(equalizeHeights, 200);
+            if (id === 'poster') { setTimeout(posterAutoScroll, 200); }
+        };
+    </script>
+</body>
+</html>
